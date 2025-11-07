@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 
-const API = "https://vibe-cart-backend-9x4y.onrender.com";
+const API = "https://vibe-cart-backend-9x4y.onrender.com/api/products";
 
 export default function App() {
   const [products, setProducts] = useState([]);
@@ -284,7 +284,7 @@ export default function App() {
         </div>
       </aside>
 
-      {/* Receipt Modal */}
+      
       {receipt && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
           <div className="bg-white p-6 rounded-xl shadow-xl w-80 text-center">
