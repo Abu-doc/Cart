@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 
 export default function App() {
+  const API_BASE = "https://vibe-cart-backend-9x4y.onrender.com";
+
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -11,14 +13,15 @@ export default function App() {
 
   // Load products + cart
   useEffect(() => {
-    fetch("http://localhost:4000/api/products")
+    fetch(`${API_BASE}/api/products`)
       .then((res) => res.json())
       .then((data) => setProducts(data));
+
     loadCart();
   }, []);
 
   const loadCart = useCallback(() => {
-    fetch("http://localhost:4000/api/cart")
+    fetch(`${API_BASE}/api/cart`)
       .then((res) => res.json())
       .then((data) => setCart(data));
   }, []);
@@ -29,35 +32,41 @@ export default function App() {
   };
 
   const addToCart = async (productId) => {
-    await fetch("http://localhost:4000/api/cart", {
+    await fetch(`${API_BASE}/api/cart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId, qty: 1 }),
     });
+
     loadCart();
     triggerToast();
   };
 
   const increaseQty = async (item) => {
-    await fetch("http://localhost:4000/api/cart", {
+    await fetch(`${API_BASE}/api/cart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId: item.productId, qty: 1 }),
     });
+
     loadCart();
   };
 
   const decreaseQty = async (item) => {
-    await fetch("http://localhost:4000/api/cart", {
+    await fetch(`${API_BASE}/api/cart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId: item.productId, qty: -1 }),
     });
+
     loadCart();
   };
 
   const removeFromCart = async (id) => {
-    await fetch(`http://localhost:4000/api/cart/${id}`, { method: "DELETE" });
+    await fetch(`${API_BASE}/api/cart/${id}`, {
+      method: "DELETE",
+    });
+
     loadCart();
   };
 
@@ -67,7 +76,7 @@ export default function App() {
       return;
     }
 
-    const res = await fetch("http://localhost:4000/api/checkout", {
+    const res = await fetch(`${API_BASE}/api/checkout`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -162,14 +171,12 @@ export default function App() {
         onClick={() => setIsCartOpen(false)}
       />
 
-      {/* ✅ FINAL FIXED CART DRAWER */}
+      {/* CART DRAWER */}
       <aside
         className={`fixed top-0 right-0 w-full sm:w-[420px] h-screen bg-white z-50 shadow-2xl 
         transform transition-transform duration-300 
         ${isCartOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-
-        {/* Header */}
         <div className="px-5 py-4 border-b flex justify-between items-center">
           <h3 className="text-xl font-bold text-purple-700">Your Cart</h3>
           <button
@@ -180,10 +187,8 @@ export default function App() {
           </button>
         </div>
 
-        {/* Drawer Content */}
+        {/* Scroll Area */}
         <div className="flex flex-col h-full">
-
-          {/* ✅ SCROLLABLE ITEMS */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
 
             {cart.items.length === 0 ? (
@@ -247,7 +252,7 @@ export default function App() {
 
           </div>
 
-          {/* ✅ REAL FIX — STICKY BOTTOM CHECKOUT */}
+          {/* Sticky Checkout Section */}
           <div className="border-t p-5 bg-white sticky bottom-0">
             <div className="flex justify-between mb-3">
               <span className="text-gray-700">Subtotal</span>
@@ -284,7 +289,6 @@ export default function App() {
               </button>
             </div>
           </div>
-
         </div>
       </aside>
 
@@ -297,7 +301,7 @@ export default function App() {
             </h2>
             <p className="mt-2">Receipt ID: {receipt.receiptId}</p>
             <p>Total Paid: ₹{receipt.total}</p>
-            <p className="text-gray-600 text-sm mt-2">
+            <p className="text-gray-600 text-sm mt-২">
               {new Date(receipt.timestamp).toLocaleString()}
             </p>
             <button
