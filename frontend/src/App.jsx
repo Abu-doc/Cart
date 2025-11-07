@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 
-export default function App() {
-  const API_BASE = "https://vibe-cart-backend-9x4y.onrender.com";
+const API = "https://vibe-cart-backend-9x4y.onrender.com";
 
+export default function App() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -13,7 +13,7 @@ export default function App() {
 
   // Load products + cart
   useEffect(() => {
-    fetch(`${API_BASE}/api/products`)
+    fetch(`${API}/api/products`)
       .then((res) => res.json())
       .then((data) => setProducts(data));
 
@@ -21,7 +21,7 @@ export default function App() {
   }, []);
 
   const loadCart = useCallback(() => {
-    fetch(`${API_BASE}/api/cart`)
+    fetch(`${API}/api/cart`)
       .then((res) => res.json())
       .then((data) => setCart(data));
   }, []);
@@ -32,41 +32,35 @@ export default function App() {
   };
 
   const addToCart = async (productId) => {
-    await fetch(`${API_BASE}/api/cart`, {
+    await fetch(`${API}/api/cart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId, qty: 1 }),
     });
-
     loadCart();
     triggerToast();
   };
 
   const increaseQty = async (item) => {
-    await fetch(`${API_BASE}/api/cart`, {
+    await fetch(`${API}/api/cart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId: item.productId, qty: 1 }),
     });
-
     loadCart();
   };
 
   const decreaseQty = async (item) => {
-    await fetch(`${API_BASE}/api/cart`, {
+    await fetch(`${API}/api/cart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId: item.productId, qty: -1 }),
     });
-
     loadCart();
   };
 
   const removeFromCart = async (id) => {
-    await fetch(`${API_BASE}/api/cart/${id}`, {
-      method: "DELETE",
-    });
-
+    await fetch(`${API}/api/cart/${id}`, { method: "DELETE" });
     loadCart();
   };
 
@@ -76,7 +70,7 @@ export default function App() {
       return;
     }
 
-    const res = await fetch(`${API_BASE}/api/checkout`, {
+    const res = await fetch(`${API}/api/checkout`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -93,13 +87,6 @@ export default function App() {
   };
 
   const cartCount = cart.items.reduce((n, item) => n + item.qty, 0);
-
-  // Close drawer on ESC
-  useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && setIsCartOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   return (
     <div className="font-sans bg-gradient-to-b from-indigo-100 to-purple-100 min-h-screen">
@@ -133,7 +120,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Products List */}
+      {/* Products */}
       <div className="p-6">
         <h2 className="text-2xl font-semibold mt-2 mb-3 text-purple-800">Products</h2>
 
@@ -177,6 +164,8 @@ export default function App() {
         transform transition-transform duration-300 
         ${isCartOpen ? "translate-x-0" : "translate-x-full"}`}
       >
+
+        {/* Header */}
         <div className="px-5 py-4 border-b flex justify-between items-center">
           <h3 className="text-xl font-bold text-purple-700">Your Cart</h3>
           <button
@@ -187,8 +176,10 @@ export default function App() {
           </button>
         </div>
 
-        {/* Scroll Area */}
+        {/* Drawer Content */}
         <div className="flex flex-col h-full">
+
+          {/* Items */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
 
             {cart.items.length === 0 ? (
@@ -252,7 +243,7 @@ export default function App() {
 
           </div>
 
-          {/* Sticky Checkout Section */}
+          {/* Checkout section */}
           <div className="border-t p-5 bg-white sticky bottom-0">
             <div className="flex justify-between mb-3">
               <span className="text-gray-700">Subtotal</span>
@@ -289,6 +280,7 @@ export default function App() {
               </button>
             </div>
           </div>
+
         </div>
       </aside>
 
@@ -301,7 +293,7 @@ export default function App() {
             </h2>
             <p className="mt-2">Receipt ID: {receipt.receiptId}</p>
             <p>Total Paid: ₹{receipt.total}</p>
-            <p className="text-gray-600 text-sm mt-২">
+            <p className="text-gray-600 text-sm mt-2">
               {new Date(receipt.timestamp).toLocaleString()}
             </p>
             <button

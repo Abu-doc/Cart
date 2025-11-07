@@ -5,7 +5,18 @@ import { Product } from "./product.model.js";
 import { CartItem } from "./cart.model.js";
 
 const app = express();
-app.use(cors());
+
+// ✅ ALLOW VERCEL FRONTEND
+app.use(
+  cors({
+    origin: [
+      "https://cart-abu-doc.vercel.app",
+      "http://localhost:5173"
+    ],
+    methods: ["GET", "POST", "DELETE"],
+  })
+);
+
 app.use(express.json());
 
 // ✅ CONNECT DB
@@ -18,10 +29,9 @@ Product.countDocuments().then(async (count) => {
       { name: "Vibe Tee", price: 599, image: "https://via.placeholder.com/200?text=Tee" },
       { name: "Hoodie", price: 1999, image: "https://via.placeholder.com/200?text=Hoodie" },
       { name: "Cap", price: 399, image: "https://via.placeholder.com/200?text=Cap" },
-      { name: "Sneakers", price: 4999, image: "https://via.placeholder.com/200?text=Sneakers" },
+      { name: "Sneakers", price: 4999, image: "https://via.placeholder.com/200?text=Shoes" },
       { name: "Sticker Pack", price: 199, image: "https://via.placeholder.com/200?text=Stickers" }
     ]);
-    console.log("✅ Products seeded");
   }
 });
 
@@ -31,39 +41,30 @@ app.get("/api/products", async (req, res) => {
   res.json(products);
 });
 
-// ✅ ADD / UPDATE CART
+// ✅ ADD TO CART
 app.post("/api/cart", async (req, res) => {
   const { productId, qty } = req.body;
 
-  if (!productId || typeof qty !== "number") {
+  if (!productId || !qty)
     return res.status(400).json({ error: "Invalid data" });
-  }
 
-  let existing = await CartItem.findOne({ productId });
+  let item = await CartItem.findOne({ productId });
 
-  if (existing) {
-    existing.qty += qty;
-
-    // ✅ REMOVE IF QTY <= 0
-    if (existing.qty <= 0) {
-      await CartItem.findByIdAndDelete(existing._id);
-      return res.json({ ok: true, removed: true });
+  if (item) {
+    item.qty += qty;
+    if (item.qty <= 0) {
+      await CartItem.findByIdAndDelete(item._id);
+      return res.json({ ok: true });
     }
-
-    await existing.save();
-    return res.json({ ok: true, item: existing });
+    await item.save();
+    return res.json({ ok: true, item });
   }
 
-  // ✅ CREATE NEW ITEM IF QTY > 0
-  if (qty > 0) {
-    const newItem = await CartItem.create({ productId, qty });
-    return res.json({ ok: true, item: newItem });
-  }
-
-  return res.status(400).json({ error: "Qty must be > 0" });
+  const newItem = await CartItem.create({ productId, qty });
+  res.json({ ok: true, item: newItem });
 });
 
-// ✅ GET CART ITEMS (WITH IMAGES)
+// ✅ GET CART ITEMS
 app.get("/api/cart", async (req, res) => {
   const items = await CartItem.find().populate("productId");
 
@@ -74,15 +75,14 @@ app.get("/api/cart", async (req, res) => {
     price: i.productId.price,
     image: i.productId.image,
     qty: i.qty,
-    lineTotal: i.productId.price * i.qty,
+    lineTotal: i.productId.price * i.qty
   }));
 
   const total = detailed.reduce((sum, i) => sum + i.lineTotal, 0);
-
   res.json({ items: detailed, total });
 });
 
-// ✅ REMOVE FROM CART
+// ✅ REMOVE ITEM
 app.delete("/api/cart/:id", async (req, res) => {
   await CartItem.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
@@ -92,14 +92,14 @@ app.delete("/api/cart/:id", async (req, res) => {
 app.post("/api/checkout", async (req, res) => {
   const { name, email, cartItems } = req.body;
 
-  if (!name || !email || !Array.isArray(cartItems))
-    return res.status(400).json({ error: "Invalid checkout data" });
+  if (!name || !email)
+    return res.status(400).json({ error: "Missing data" });
 
   let total = 0;
 
   for (const item of cartItems) {
-    const product = await Product.findById(item.productId);
-    if (product) total += product.price * item.qty;
+    const p = await Product.findById(item.productId);
+    if (p) total += p.price * item.qty;
   }
 
   const receipt = {
@@ -109,6 +109,7 @@ app.post("/api/checkout", async (req, res) => {
   };
 
   await CartItem.deleteMany();
+
   res.json(receipt);
 });
 
