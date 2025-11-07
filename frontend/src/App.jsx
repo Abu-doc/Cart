@@ -11,7 +11,7 @@ export default function App() {
   const [checkoutData, setCheckoutData] = useState({ name: "", email: "" });
   const [receipt, setReceipt] = useState(null);
 
-  // Load products + cart
+  
   useEffect(() => {
     fetch(`${API}/api/products`)
       .then((res) => res.json())
@@ -91,7 +91,7 @@ export default function App() {
   return (
     <div className="font-sans bg-gradient-to-b from-indigo-100 to-purple-100 min-h-screen">
 
-      {/* NAVBAR */}
+      
       <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <h1 className="text-3xl font-extrabold text-purple-700">VibeCart 🛍️</h1>
 
@@ -113,14 +113,14 @@ export default function App() {
         </button>
       </nav>
 
-      {/* Toast */}
+      
       {showToast && (
         <div className="fixed top-20 right-5 bg-purple-600 text-white px-4 py-2 rounded-xl shadow-lg animate-bounce z-40">
           ✅ Added to Cart!
         </div>
       )}
 
-      {/* Products */}
+      
       <div className="p-6">
         <h2 className="text-2xl font-semibold mt-2 mb-3 text-purple-800">Products</h2>
 
@@ -150,7 +150,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* OVERLAY */}
+    
       <div
         className={`fixed inset-0 bg-black/40 z-40 transition-opacity ${
           isCartOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -158,14 +158,13 @@ export default function App() {
         onClick={() => setIsCartOpen(false)}
       />
 
-      {/* CART DRAWER */}
+      
       <aside
         className={`fixed top-0 right-0 w-full sm:w-[420px] h-screen bg-white z-50 shadow-2xl 
         transform transition-transform duration-300 
         ${isCartOpen ? "translate-x-0" : "translate-x-full"}`}
       >
 
-        {/* Header */}
         <div className="px-5 py-4 border-b flex justify-between items-center">
           <h3 className="text-xl font-bold text-purple-700">Your Cart</h3>
           <button
@@ -176,10 +175,10 @@ export default function App() {
           </button>
         </div>
 
-        {/* Drawer Content */}
+    
         <div className="flex flex-col h-full">
 
-          {/* Items */}
+          
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
 
             {cart.items.length === 0 ? (
@@ -243,7 +242,6 @@ export default function App() {
 
           </div>
 
-          {/* Checkout section */}
           <div className="border-t p-5 bg-white sticky bottom-0">
             <div className="flex justify-between mb-3">
               <span className="text-gray-700">Subtotal</span>

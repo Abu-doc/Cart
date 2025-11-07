@@ -6,11 +6,11 @@ import { CartItem } from "./cart.model.js";
 
 const app = express();
 
-// ✅ ALLOW VERCEL FRONTEND
+
 app.use(
   cors({
     origin: [
-      "https://cart-abu-doc.vercel.app",
+      "https://cart-three-red.vercel.app",
       "http://localhost:5173"
     ],
     methods: ["GET", "POST", "DELETE"],
@@ -19,10 +19,8 @@ app.use(
 
 app.use(express.json());
 
-// ✅ CONNECT DB
 connectDB();
 
-// ✅ SEED PRODUCTS IF EMPTY
 Product.countDocuments().then(async (count) => {
   if (count === 0) {
     await Product.insertMany([
@@ -35,13 +33,13 @@ Product.countDocuments().then(async (count) => {
   }
 });
 
-// ✅ GET PRODUCTS
+
 app.get("/api/products", async (req, res) => {
   const products = await Product.find();
   res.json(products);
 });
 
-// ✅ ADD TO CART
+
 app.post("/api/cart", async (req, res) => {
   const { productId, qty } = req.body;
 
@@ -64,7 +62,7 @@ app.post("/api/cart", async (req, res) => {
   res.json({ ok: true, item: newItem });
 });
 
-// ✅ GET CART ITEMS
+
 app.get("/api/cart", async (req, res) => {
   const items = await CartItem.find().populate("productId");
 
@@ -82,13 +80,13 @@ app.get("/api/cart", async (req, res) => {
   res.json({ items: detailed, total });
 });
 
-// ✅ REMOVE ITEM
+
 app.delete("/api/cart/:id", async (req, res) => {
   await CartItem.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
 });
 
-// ✅ CHECKOUT
+
 app.post("/api/checkout", async (req, res) => {
   const { name, email, cartItems } = req.body;
 
@@ -113,7 +111,7 @@ app.post("/api/checkout", async (req, res) => {
   res.json(receipt);
 });
 
-// ✅ START SERVER
+
 app.listen(4000, () => {
   console.log("✅ Backend running at http://localhost:4000");
 });
